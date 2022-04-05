@@ -12,7 +12,7 @@ library(ggplot2)
 library(tidyverse)
 HighSchool2 <- read.csv("HighSchool2.csv")
 
-# Define UI for application that draws a histogram
+# Define UI for application that draws barplot
 ui <- fluidPage(
 
     # Application title
@@ -38,15 +38,14 @@ ui <- fluidPage(
 server <- function(input, output) {
 
     hs <- reactive({
-        req(input$state)
-        data_hs<- HighSchool2 #%>% filter(state %in% input$state)
+        HighSchool2[,c("Race",input$state)] 
     })
     
     output$StatePlot <- renderPlot({
         # Render a barplot
-        ggplot(hs(), aes(x=Race)) +
-            geom_bar() + 
-            ggtitle("High School Level or Higher Educational Attainment By Race") +
+        ggplot(hs(), aes(x=Race,y=hs()[,input$state])) +
+            geom_col() +
+            ggtitle("Educational Attainment Level By Race") +
             xlab("Race") +
             ylab("Percent Attainment") 
     })
