@@ -10,7 +10,8 @@
 library(shiny)
 library(ggplot2)
 library(tidyverse)
-HighSchool2 <- read.csv("HighSchool2.csv")
+HighSchool <- read.csv("HighSchool2.csv")
+Bachelor <- read.csv("Bachelor1.csv")
 
 # Define UI for application that draws barplot
 ui <- fluidPage(
@@ -22,9 +23,11 @@ ui <- fluidPage(
   
     sidebarLayout(
         sidebarPanel(
-            selectInput("state", "Choose A State:", 
-                        choices=colnames(HighSchool2[2:51])),
-            helpText("Data from National Center of Education Statistics.")
+          radioButtons("level", "Choose Education Level to View",
+                       c("Highschool and Over", "Bachelor's and Over")),
+          selectInput("state", "Choose A State:", 
+                      choices=colnames(HighSchool[2:51])),
+        helpText("Data from National Center of Education Statistics.")
         ),
 
         # Show a plot of the generated distribution
@@ -34,42 +37,29 @@ ui <- fluidPage(
     )
 )
 
-# Define server logic required to draw a barplot
-server <- function(input, output) {
 
+server <- function(input, output, session) {
+    observe({
+      updateSelectInput(session, "state", "Choose A State:", 
+                  choices=colnames(HighSchool[2:51]))
+    })
+  
+  
     hs <- reactive({
-        HighSchool2[,c("Race",input$state)] 
+      if(input$level=="Highschool and Over"){HighSchool[,c("Race",input$state)]
+        }
+      else(Bachelor[,c("Race",input$state)])   
     })
     
     output$StatePlot <- renderPlot({
         # Render a barplot
-        ggplot(hs(), aes(x=Race,y=hs()[,input$state])) +
+        ggplot(hs(), aes(x=Race,y=hs()[,input$state],fill=Race)) +
             geom_col() +
             ggtitle("Educational Attainment Level By Race") +
             xlab("Race") +
             ylab("Percent Attainment") 
     })
 }
-
-#"Alabama", "Alaska", "Arizona",
-# "Arkansas", "California",
-# "Colorado", "Connecticut",
-# "Delaware", "Florida", "Georgia",
-# "Hawaii", "Idaho", "Illinois",
-# "Indiana", "Iowa", "Kansas",
-# "Kentucky", "Louisana", "Maine",
-# "Maryland", "Massachusetts",
-# "Michigan", "Minnesota",
-# "Mississippi", "Missouri", "Montana",
-# "Nebraska", "Nevada", "New Hampshire",
-# "New Jersey", "New Mexico","New York",
-# "North Carolina", "North Dakota",
-# "Ohio","Oklahoma","Oregon",
-# "Pennsylvania", "Rhode Island",
-# "South Carolina", "South Dakota",
-# "Tennessee", "Texas", "Utah",
-# "Vermont", "Virginia", "Washington",
-# "West Virginia", "Wisconsin", "Wyoming"
 
 # Run the application 
 shinyApp(ui = ui, server = server)
