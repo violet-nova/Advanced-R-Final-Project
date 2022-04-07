@@ -18,8 +18,8 @@ Berror <- as.data.frame(read_csv("BachelorError.csv"))
 
 bach_adj_map <- read_csv("bach_adj.csv")
 hs_adj_map <- read_csv("hs_adj.csv")
-us <- urbnmapr::get_urbn_map("states", sf = TRUE)
-st_crs(us) = 2056
+us <- st_read("states_map.shp")
+
 
 # Define UI for application that draws barplot
 ui <- fluidPage(
