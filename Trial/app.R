@@ -11,6 +11,7 @@ library(shiny)
 library(ggplot2)
 library(tidyverse)
 library(ggiraph)
+library(sf)
 HighSchool <- as.data.frame(read_csv("HighSchool2.csv"))
 Bachelor <- as.data.frame(read_csv("Bachelor1.csv"))
 HSerror <- as.data.frame(read_csv("HighSchoolError.csv"))
@@ -82,6 +83,15 @@ server <- function(input, output, session) {
       return(map_df)
     })
     
+    plotTitle <- reactive({
+      if(input$level=="Highschool and Over"){
+        return("High School Attainment by Race")
+      }
+      else{
+        return("Bachelor's Attainment By Race")}
+      })   
+
+    
     output$MapPlot <- renderGirafe({
     
       map_interactive <- ggplot(edu_map()) + 
@@ -91,18 +101,18 @@ server <- function(input, output, session) {
       x <- girafe(ggobj = map_interactive)
       
     })
-
     output$StatePlot <- renderPlot({
-        # Render a barplot
-        ggplot(edu(), aes(x=Race,y=state,fill=Race)) +
-            geom_col() +
-            ggtitle("Educational Attainment Level By Race") +
-            xlab("Race") +
-            ylab("Percent of Population") +
-            geom_errorbar(aes(x=Race,
+      # Render a barplot
+      ggplot(edu(), aes(x=Race,y=state,fill=Race)) +
+        geom_col() +
+        ggtitle(paste0(plotTitle())) +
+        xlab("Race") +
+        ylab("Percent with Attainment") +
+        geom_errorbar(aes(x=Race,
                           ymin=state-error,
                           ymax=state+error))
     })
+    
 }
 
 # Run the application 
