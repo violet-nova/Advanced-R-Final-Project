@@ -12,6 +12,8 @@ library(ggplot2)
 library(tidyverse)
 library(ggiraph)
 library(sf)
+library(crayon)
+
 HighSchool <- as.data.frame(read_csv("HighSchool2.csv"))
 Bachelor <- as.data.frame(read_csv("Bachelor1.csv"))
 HSerror <- as.data.frame(read_csv("HighSchoolError.csv"))
@@ -83,20 +85,29 @@ server <- function(input, output, session) {
       return(map_df)
     })
     
-    plotTitle <- reactive({
+    measure <- reactive({
       if(input$level=="Highschool and Over"){
-        return("High School Attainment by Race")
+        return("High School Attainment")
       }
       else{
-        return("Bachelor's Attainment By Race")}
-      })   
-
+        return("Bachelor's Attainment")}
+      })
+    
+    stateSelection <- reactive({
+      return(input$state)})
+    
+    raceSel <- reactive({
+      return(input$race)
+    })
+    
+    
+    # Map Plot
     
     output$MapPlot <- renderGirafe({
     
       map_interactive <- ggplot(edu_map()) + 
-        geom_sf_interactive(aes(fill = !!input$race, tooltip = !!input$race, data_id = state_name)) + 
-        theme_void()
+        geom_sf_interactive(aes(fill = !!input$race, tooltip = paste(state_name, sprintf("%+g",!!input$race), sep=": "), data_id = state_name)) + 
+        theme_void() + labs(fill = "Margin") + ggtitle(paste("State-by-State Comparison to U.S. Average: \n",raceSel(),measure()))
       
       x <- girafe(ggobj = map_interactive)
       
@@ -105,7 +116,7 @@ server <- function(input, output, session) {
       # Render a barplot
       ggplot(edu(), aes(x=Race,y=state,fill=Race)) +
         geom_col() +
-        ggtitle(paste0(plotTitle())) +
+        ggtitle(paste(measure(),"by Race in",stateSelection())) +
         xlab("Race") +
         ylab("Percent with Attainment") +
         geom_errorbar(aes(x=Race,
