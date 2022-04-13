@@ -63,14 +63,14 @@ server <- function(input, output, session) {
     edu <- reactive({
       if(input$level=="Highschool and Over"){
         df=data.frame(Race=HighSchool[,"Race"], 
-                      state=HighSchool[,input$state],
-                      error=HSerror[,input$state])
+                      state=HighSchool[,stateSelection()],
+                      error=HSerror[,stateSelection()])
         return(df)
         }
       else({
         df=data.frame(Race=Bachelor[,"Race"], 
-                         state=Bachelor[,input$state],
-                         error=Berror[,input$state])
+                         state=Bachelor[,stateSelection()],
+                         error=Berror[,stateSelection()])
         return(df)
         })   
     })
@@ -94,13 +94,21 @@ server <- function(input, output, session) {
         return("Bachelor's Attainment")}
       })
     
+    stateClick <- reactive({
+      if(is.null(input$MapPlot_selected)){
+      return("United States Average")}
+      else{
+        return(input$MapPlot_selected)
+      }
+        })
+    
     stateSelection <- reactive({
-      return(input$state)})
+      return(input$state)
+    })
     
     raceSel <- reactive({
       return(input$race)
     })
-    
     
     # Map Plot
     
@@ -110,7 +118,10 @@ server <- function(input, output, session) {
         geom_sf_interactive(aes(fill = !!input$race, tooltip = paste(state_name, sprintf("%+g",!!input$race), sep=": "), data_id = state_name)) + 
         theme_void() + labs(fill = "Margin") + ggtitle(paste("State-by-State Comparison to U.S. Average: \n",raceSel(),measure()))
       
-      x <- girafe(ggobj = map_interactive)
+      x <- girafe(ggobj = map_interactive, 
+                  options = list(opts_selection(type = "single", 
+                                                only_shiny = FALSE,
+                                                css = "fill:yellow;stroke:gray;")))
       
     })
     output$StatePlot <- renderPlot({
@@ -126,7 +137,11 @@ server <- function(input, output, session) {
       
     
     })
-    
+    observeEvent(stateClick(), {
+      updateSelectInput(session, "state", 
+                        label = "Choose A State",
+                        selected = stateClick())
+    })
 }
 
 # Run the application 
