@@ -13,6 +13,7 @@ library(tidyverse)
 library(ggiraph)
 library(sf)
 library(crayon)
+library(ggpubr)
 
 HighSchool <- as.data.frame(read_csv("HighSchool2.csv"))
 Bachelor <- as.data.frame(read_csv("Bachelor1.csv"))
@@ -122,6 +123,8 @@ server <- function(input, output, session) {
         geom_errorbar(aes(x=Race,
                           ymin=state-error,
                           ymax=state+error))
+      
+    
     })
     
 }
