@@ -58,6 +58,20 @@ server <- function(input, output, session) {
                   choices=colnames(HighSchool[2:53]))
     })
   
+    total <- reactive({
+      if(input$level == "Highschool and Over"){
+        df = data.frame(Race = HighSchool[,"Race"],
+                        state = HighSchool[,"United States Average"],
+                        error = HSerror[,"United States Average"])
+        return(df)
+        }
+      else{
+        df = data.frame(Race = Bachelor[,"Race"],
+                        state = Bachelor[,"United States Average"],
+                        error = Berror[,"United States Average"])
+        return(df)
+        }
+    })
   
     edu <- reactive({
       if(input$level=="Highschool and Over"){
@@ -109,6 +123,31 @@ server <- function(input, output, session) {
       return(input$race)
     })
     
+    plot_df <- reactive({
+      state_attain <- edu() %>% 
+        select("Race", state) %>% 
+        rename(paste(input$state) = state)
+      state_error <- edu() %>% 
+        select("Race", error) %>% 
+        rename(paste(input$state) = error)
+      total_attain <- total() %>% 
+        select("Race", state) %>%
+        rename("US Average" = state)
+      total_error <- total() %>% 
+        select("Race", error) %>% 
+        rename("US Average" = error)
+      full_attain <- full_join(state_attain, total_attain, by = "Race") %>% 
+        pivot_longer(c(paste(input$state), "US Average"), 
+                     names_to = "state",
+                     values_to = "attainment")
+      full_error <- full_join(state_error, total_error, by = "Race") %>%
+        pivot_longer(c(paste(input$state), "US Average"), 
+                     names_to = "state",
+                     values_to = "error")
+      full_df <- full_join(full_attain, full_error, by = c("Race", "state"))
+      return(full_df)
+    })
+    
     # Map Plot
     
     output$MapPlot <- renderGirafe({
@@ -125,14 +164,18 @@ server <- function(input, output, session) {
     })
     output$StatePlot <- renderPlot({
       # Render a barplot
-      ggplot(edu(), aes(x=Race,y=state,fill=Race)) +
-        geom_col() +
+      ggplot(plot_df(), aes(x=Race,y=attainment,fill=state)) +
+        geom_col() + 
         ggtitle(paste(measure(),"by Race in",stateSelection())) +
         xlab("Race") +
         ylab("Percent with Attainment") +
         geom_errorbar(aes(x=Race,
-                          ymin=state-error,
-                          ymax=state+error))
+                          ymin=attainment-error,
+                          ymax=attainment+error, 
+                          group = state), 
+                      size = 0.5,
+                      width = 0.6,
+                      position = position_dodge(0.9))
     })
     observeEvent(stateClick(), {
       updateSelectInput(session, "state", 
