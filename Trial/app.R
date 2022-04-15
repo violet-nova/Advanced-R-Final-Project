@@ -13,6 +13,7 @@ library(tidyverse)
 library(ggiraph)
 library(sf)
 library(crayon)
+library(ggpubr)
 
 HighSchool <- as.data.frame(read_csv("Trial/HighSchool2.csv"))
 Bachelor <- as.data.frame(read_csv("Trial/Bachelor1.csv"))
@@ -201,3 +202,4 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
