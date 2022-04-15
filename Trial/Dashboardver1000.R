@@ -29,38 +29,20 @@ us <- st_read("states_map.shp")
 
 ui <- dashboardPage(
   dashboardHeader(title = "Educational Attainment By State and Race/Ethnicity", 
-                  titleWidth = 450),
+                  titleWidth = 600),
    dashboardSidebar(radioButtons("level", "Choose Education Level to View:",
                                 c("Highschool and Over", "Bachelor's and Over")),
-                   varSelectInput("race", "Race/Ethnicity:", icon = icon("user", lib = "glyphicon"),
+                   varSelectInput("race", "Race/Ethnicity:",
                                   data = select(bach_adj_map, -c(1,state_name))),
-                   selectInput("state", "State:", icon = icon("star", lib = "glyphicon"),
+                   selectInput("state", "State:",
                                choices=colnames(HighSchool[2:51])),
                    helpText("Data from National Center of Education Statistics.")),
   dashboardBody(
-    
-    # infoBoxes with fill=FALSE
-    fluidRow(
-      # A static infoBox
-      infoBox("Total Attainment", 10 * 2, icon = icon("credit-card")),
-      # Dynamic infoBoxes
-      infoBoxOutput("progressBox"),
-      infoBoxOutput("approvalBox")
     # Boxes need to be put in a row (or column)
-    fluidRow(
-      box(  girafeOutput("MapPlot"),
-            plotOutput("StatePlot")),
+    fluidRow( column(width = 7, box(girafeOutput("MapPlot"))),
       
-      box(
-        title = "Controls",
-        sliderInput("slider", "Number of observations:", 1, 51, 1),
-        
-        box(
-          title = "Educational Attainment",
-          sliderInput("slider", "Number of observations:", 1, 100, 50)
-      )
-    )
-    
+    column(width = 5, offset = 0, box(plotOutput("StatePlot"))))
+  )  
 )
 
 
