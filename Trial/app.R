@@ -13,6 +13,7 @@ library(tidyverse)
 library(ggiraph)
 library(sf)
 library(crayon)
+library(ggpubr)
 
 
 HighSchool <- as.data.frame(read_csv("HighSchool2.csv"))
@@ -134,6 +135,8 @@ server <- function(input, output, session) {
         geom_errorbar(aes(x=Race,
                           ymin=state-error,
                           ymax=state+error))
+      
+    
     })
     observeEvent(stateClick(), {
       updateSelectInput(session, "state", 
@@ -144,3 +147,4 @@ server <- function(input, output, session) {
 
 # Run the application 
 shinyApp(ui = ui, server = server)
+
