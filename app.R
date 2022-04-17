@@ -15,7 +15,7 @@ library(sf)
 library(crayon)
 library(stringr)
 library(ggpubr)
-library(ggpattern)
+library(shinyBS)
 
 
 
@@ -45,15 +45,20 @@ ui <- fluidPage(
         sidebarPanel(
           radioButtons("level", "Choose Education Level to View:",
                        c("Highschool and Over", "Bachelor's and Over")),
+          helpText("Choose between either high school or secondary educational attainment rates to display them in the 
+                   map and bar chart."),
           varSelectInput("race", "Choose A Race/Ethnicity:",
                        data = select(bach_adj_map, -c(1,state_name))),
+          helpText("Choose a race/ethnicity to display their attainment rates on the map."),
           selectInput("state", "Choose A State:", 
                       choices=colnames(HighSchool[2:51])),
+          helpText("Select a state to compare their racial education gaps against the national average in the bar chart."),
+          helpText("You can also select a state directly in the map to view it's metrics in the bar chart."),
         helpText("Data from National Center of Education Statistics.")),
 
         # Show a plot of the generated distribution
         mainPanel(
-           girafeOutput("MapPlot",
+          girafeOutput("MapPlot",
                         width = "100%",
                         height = "500px"),
            plotOutput(outputId = "StatePlot", 
@@ -63,7 +68,6 @@ ui <- fluidPage(
         )
     )
 )
-
 
 server <- function(input, output, session) {
     observe({
@@ -209,7 +213,7 @@ server <- function(input, output, session) {
                       size = 0.7,
                       width = 0.65,
                       position = position_dodge(0.9)) + 
-        guides(color = FALSE) + 
+        guides(color = "none") + 
         theme_minimal() +
         theme(axis.text.x = element_text(angle = -45, vjust = 1, hjust = 0))
     })
