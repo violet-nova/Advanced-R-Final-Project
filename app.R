@@ -25,8 +25,8 @@ Berror <- as.data.frame(read_csv("Trial/BachelorError.csv"))
 bach_adj_map <- read_csv("Trial/bach_adj.csv")
 hs_adj_map <- read_csv("Trial/hs_adj.csv")
 us <- st_read("Trial/states_map.shp")
-names(bach_adj_map)[8] <-"multiracial"
-names(hs_adj_map)[8] <- "multiracial"
+names(bach_adj_map)[8] <-"Multiracial"
+names(hs_adj_map)[8] <- "Multiracial"
 
 
 # Define UI for application that draws barplot
