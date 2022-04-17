@@ -13,7 +13,9 @@ library(tidyverse)
 library(ggiraph)
 library(sf)
 library(crayon)
+library(stringr)
 library(ggpubr)
+library(shinyBS)
 
 HighSchool <- as.data.frame(read_csv("Trial/HighSchool2.csv"))
 Bachelor <- as.data.frame(read_csv("Trial/Bachelor1.csv"))
@@ -39,21 +41,29 @@ ui <- fluidPage(
         sidebarPanel(
           radioButtons("level", "Choose Education Level to View:",
                        c("Highschool and Over", "Bachelor's and Over")),
+          helpText("Choose between either high school or secondary educational attainment rates to display them in the 
+                   map and bar chart."),
           varSelectInput("race", "Choose A Race/Ethnicity:",
                        data = select(bach_adj_map, -c(1,state_name))),
+          helpText("Choose a race/ethnicity to display their attainment rates on the map."),
           selectInput("state", "Choose A State:", 
                       choices=colnames(HighSchool[2:51])),
-        helpText("Data from National Center of Education Statistics.")
-        ),
+          helpText("Select a state to compare their racial education gaps against the national average in the bar chart."),
+          helpText("You can also select a state directly in the map to view it's metrics in the bar chart."),
+        helpText("Data from National Center of Education Statistics.")),
 
         # Show a plot of the generated distribution
         mainPanel(
-           girafeOutput("MapPlot"),
-           plotOutput("StatePlot")
+          girafeOutput("MapPlot",
+                        width = "100%",
+                        height = "500px"),
+           plotOutput(outputId = "StatePlot", 
+                      width = "100%",
+                      height = "300px")
+           
         )
     )
 )
-
 
 server <- function(input, output, session) {
     observe({
@@ -155,7 +165,7 @@ server <- function(input, output, session) {
     
     output$MapPlot <- renderGirafe({
     
-      map_interactive <- ggplot(edu_map()) + 
+      map_interactive <- ggplot(edu_map()) +
         geom_sf_interactive(aes(fill = !!input$race, 
                                 tooltip = paste(state_name, 
                                                 sprintf("%+g",!!input$race), 
@@ -168,8 +178,13 @@ server <- function(input, output, session) {
                       measure())) +
         scale_fill_gradient2(low = "#CB4335", 
                              mid = "white", 
-                             high = "#2E86C1", 
-                             na.value = "black")
+                             high = "#2E86C1",
+                             na.value = "grey") + 
+        theme(panel.spacing = unit(0, "cm"),
+              panel.border = element_blank(),
+              panel.grid.major = element_blank(),
+              panel.grid.minor = element_blank(),
+              plot.margin = margin(0, 0, 0, 0, "cm"))
       
       x <- girafe(ggobj = map_interactive, 
                   options = list(opts_selection(type = "single", 
@@ -180,20 +195,23 @@ server <- function(input, output, session) {
     output$StatePlot <- renderPlot({
       # Render a barplot
       ggplot(plot_df(), aes(x=Race,y=attainment,fill=state)) +
-        geom_col(position = 'dodge') + 
-        ggtitle(paste(measure(),"by Race in",stateSelection())) +
+        geom_col(width = 0.8, position = position_dodge(0.9), aes(color = state)) + 
+        labs(title = str_wrap(paste(measure(),"by Race in",stateSelection()), 30)) +
         scale_fill_discrete(name = "Region", 
                             labels = c(stateSelection(), "US Average")) + 
         scale_fill_manual(values = c("#CB4335", "#2E86C1")) + 
+        scale_color_manual(values = c("#B03A2E", "#2874A6")) + 
         labs(x = "Race", y = "Percent with Attainment", fill = "Region") +
         geom_errorbar(aes(x=Race,
                           ymin=attainment-error,
                           ymax=attainment+error, 
                           group = state), 
-                      size = 0.5,
-                      width = 0.6,
+                      size = 0.7,
+                      width = 0.65,
                       position = position_dodge(0.9)) + 
-        theme_minimal()
+        guides(color = "none") + 
+        theme_minimal() +
+        theme(axis.text.x = element_text(angle = -45, vjust = 1, hjust = 0))
     })
     observeEvent(stateClick(), {
       updateSelectInput(session, "state", 
