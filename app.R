@@ -8,14 +8,10 @@
 #
 
 library(shiny)
-library(ggplot2)
 library(tidyverse)
 library(ggiraph)
 library(sf)
-library(crayon)
-library(stringr)
-library(ggpubr)
-library(shinyBS)
+
 
 
 
@@ -29,8 +25,8 @@ Berror <- as.data.frame(read_csv("Trial/BachelorError.csv"))
 bach_adj_map <- read_csv("Trial/bach_adj.csv")
 hs_adj_map <- read_csv("Trial/hs_adj.csv")
 us <- st_read("Trial/states_map.shp")
-names(bach_adj_map)[8] <-"multiracial"
-names(hs_adj_map)[8] <- "multiracial"
+names(bach_adj_map)[8] <-"Multiracial"
+names(hs_adj_map)[8] <- "Multiracial"
 
 
 # Define UI for application that draws barplot
@@ -43,16 +39,16 @@ ui <- fluidPage(
   
     sidebarLayout(
         sidebarPanel(
-          radioButtons("level", "Choose Education Level to View:",
-                       c("Highschool and Over", "Bachelor's and Over")),
           helpText("Choose between either high school or secondary educational attainment rates to display them in the 
                    map and bar chart."),
+          radioButtons("level", "Choose Education Level to View:",
+                       c("Highschool and Over", "Bachelor's and Over")),
+          helpText("Choose a race/ethnicity to display their attainment rates on the map."),
           varSelectInput("race", "Choose A Race/Ethnicity:",
                        data = select(bach_adj_map, -c(1,state_name))),
-          helpText("Choose a race/ethnicity to display their attainment rates on the map."),
+          helpText("Select a state to compare their racial education gaps against the national average in the bar chart."),
           selectInput("state", "Choose A State:", 
                       choices=colnames(HighSchool[2:51])),
-          helpText("Select a state to compare their racial education gaps against the national average in the bar chart."),
           helpText("You can also select a state directly in the map to view it's metrics in the bar chart."),
         helpText("Data from National Center of Education Statistics.")),
 
@@ -191,9 +187,11 @@ server <- function(input, output, session) {
               plot.margin = margin(0, 0, 0, 0, "cm"))
       
       x <- girafe(ggobj = map_interactive, 
-                  options = list(opts_selection(type = "single", 
+                  options = list(opts_selection(selected = stateSelection(),
+                                                type = "single", 
                                                 only_shiny = FALSE,
-                                                css = "fill:yellow;stroke:grey;")))
+                                                css = girafe_css(area = "stroke-width:2.5px",
+                                                                  css = "fill:yellow;stroke:gray;"))))
       
     })
     output$StatePlot <- renderPlot({
@@ -222,6 +220,7 @@ server <- function(input, output, session) {
                         label = "Choose A State",
                         selected = stateClick())
     })
+    
 }
 
 # Run the application 
