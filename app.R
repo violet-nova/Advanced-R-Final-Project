@@ -8,13 +8,10 @@
 #
 
 library(shiny)
-library(ggplot2)
 library(tidyverse)
 library(ggiraph)
 library(sf)
-library(crayon)
-library(stringr)
-library(ggpubr)
+#library(crayon)
 library(shinyBS)
 
 HighSchool <- as.data.frame(read_csv("Trial/HighSchool2.csv"))
@@ -187,9 +184,11 @@ server <- function(input, output, session) {
               plot.margin = margin(0, 0, 0, 0, "cm"))
       
       x <- girafe(ggobj = map_interactive, 
-                  options = list(opts_selection(type = "single", 
+                  options = list(opts_selection(selected = stateSelection(),
+                                                type = "single", 
                                                 only_shiny = FALSE,
-                                                css = "fill:yellow;stroke:grey;")))
+                                                css = girafe_css(area = "stroke-width:2.5px",
+                                                                  css = "fill:yellow;stroke:gray;"))))
       
     })
     output$StatePlot <- renderPlot({
@@ -218,6 +217,7 @@ server <- function(input, output, session) {
                         label = "Choose A State",
                         selected = stateClick())
     })
+    
 }
 
 # Run the application 
