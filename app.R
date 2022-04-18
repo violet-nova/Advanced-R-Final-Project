@@ -29,30 +29,30 @@ names(bach_adj_map)[8] <-"Multiracial"
 names(hs_adj_map)[8] <- "Multiracial"
 
 
-# Define UI for application that draws barplot
+# Define UI for application 
 ui <- fluidPage(
 
     # Application title
     titlePanel("Educational Attainment By State and Race/Ethnicity"),
 
-    # sidebar with dropdown
+    # Sidebar
   
     sidebarLayout(
         sidebarPanel(
           helpText("Choose between either high school or secondary educational attainment rates to display them in the 
                    map and bar chart."),
           radioButtons("level", "Choose Education Level to View:",
-                       c("Highschool and Over", "Bachelor's and Over")),
+                       c("High School and Over", "Bachelor's and Over")),
           helpText("Choose a race/ethnicity to display their attainment rates on the map."),
           varSelectInput("race", "Choose A Race/Ethnicity:",
                        data = select(bach_adj_map, -c(1,state_name))),
           helpText("Select a state to compare their racial education gaps against the national average in the bar chart."),
           selectInput("state", "Choose A State:", 
                       choices=colnames(HighSchool[2:51])),
-          helpText("You can also select a state directly in the map to view it's metrics in the bar chart."),
+          helpText("You can also select a state directly in the map to view its metrics in the bar chart."),
         helpText("Data from National Center of Education Statistics.")),
 
-        # Show a plot of the generated distribution
+        # Main panel order
         mainPanel(
           girafeOutput("MapPlot",
                         width = "100%",
@@ -72,7 +72,7 @@ server <- function(input, output, session) {
     })
   
     total <- reactive({
-      if(input$level == "Highschool and Over"){
+      if(input$level == "High School and Over"){
         df = data.frame(Race = HighSchool[,"Race"],
                         state = HighSchool[,"United States Average"],
                         error = HSerror[,"United States Average"])
@@ -87,7 +87,7 @@ server <- function(input, output, session) {
     })
   
     edu <- reactive({
-      if(input$level=="Highschool and Over"){
+      if(input$level=="High School and Over"){
         df=data.frame(Race=HighSchool[,"Race"], 
                       state=HighSchool[,stateSelection()],
                       error=HSerror[,stateSelection()])
@@ -102,7 +102,7 @@ server <- function(input, output, session) {
     })
   
     edu_map <- reactive({
-      if(input$level=="Highschool and Over"){
+      if(input$level=="High School and Over"){
         df=data.frame(hs_adj_map)
       }
       else({
@@ -113,7 +113,7 @@ server <- function(input, output, session) {
     })
     
     measure <- reactive({
-      if(input$level=="Highschool and Over"){
+      if(input$level=="High School and Over"){
         return("High School Attainment")
       }
       else{
@@ -217,7 +217,7 @@ server <- function(input, output, session) {
     })
     observeEvent(stateClick(), {
       updateSelectInput(session, "state", 
-                        label = "Choose A State",
+                        label = "Choose A State:",
                         selected = stateClick())
     })
     
