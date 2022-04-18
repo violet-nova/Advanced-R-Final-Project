@@ -11,8 +11,7 @@ library(shiny)
 library(tidyverse)
 library(ggiraph)
 library(sf)
-#library(crayon)
-library(shinyBS)
+
 
 HighSchool <- as.data.frame(read_csv("Trial/HighSchool2.csv"))
 Bachelor <- as.data.frame(read_csv("Trial/Bachelor1.csv"))
@@ -36,16 +35,16 @@ ui <- fluidPage(
   
     sidebarLayout(
         sidebarPanel(
-          radioButtons("level", "Choose Education Level to View:",
-                       c("Highschool and Over", "Bachelor's and Over")),
           helpText("Choose between either high school or secondary educational attainment rates to display them in the 
                    map and bar chart."),
+          radioButtons("level", "Choose Education Level to View:",
+                       c("Highschool and Over", "Bachelor's and Over")),
+          helpText("Choose a race/ethnicity to display their attainment rates on the map."),
           varSelectInput("race", "Choose A Race/Ethnicity:",
                        data = select(bach_adj_map, -c(1,state_name))),
-          helpText("Choose a race/ethnicity to display their attainment rates on the map."),
+          helpText("Select a state to compare their racial education gaps against the national average in the bar chart."),
           selectInput("state", "Choose A State:", 
                       choices=colnames(HighSchool[2:51])),
-          helpText("Select a state to compare their racial education gaps against the national average in the bar chart."),
           helpText("You can also select a state directly in the map to view it's metrics in the bar chart."),
         helpText("Data from National Center of Education Statistics.")),
 
